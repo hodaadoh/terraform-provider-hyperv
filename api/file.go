@@ -120,7 +120,7 @@ $path='{{.Path}}'
 $fileObject = $null
 if (Test-Path $path) {
 	$fileObject = Get-ChildItem -path $path | %{ @{
-		Path=$_.Path
+		Path=$_.FullName
 		Name=$_.Name;
 		Size=$_.Length;
 		DirName=$_.DirectoryName;
@@ -143,7 +143,7 @@ func (c *HypervClient) GetFile(path string) (result file, err error) {
 	// BUAK: see CreateOrUpdateFile above
 	err = c.runScriptWithResult(getFileTemplate, getFileArgs{
 		Path: path,
-	}, &result)  // BUAK: runScriptWithResult reads JSON output from the script
+	}, &result) // BUAK: runScriptWithResult reads JSON output from the script
 
 	return result, err
 }
