@@ -4,6 +4,7 @@ import (
 	"text/template"
 )
 
+// BUAK: Provider-specific struct represents on Hyper-V that holds necessary infos
 type file struct {
 	Path          string
 	Source        string
@@ -15,16 +16,17 @@ type file struct {
 	LastWriteTime string
 }
 
+// BUAK: Arguments to the createOrUpdateFile ps1 script
 type createOrUpdateFileArgs struct {
 	Source string
 	Path   string
-	//FileJson    string
 }
 
+// BUAK: CreateOrUpdateFile ps1 script
 var createOrUpdateFileTemplate = template.Must(template.New("CreateOrUpdateFile").Parse(`
 $ErrorActionPreference = 'Stop'
 
-$source='{{.Source}}'
+$source='{{.Source}}'  # BUAK: brackets will be replaced by the templating engine
 $path='{{.Path}}'
 
 function Get-FileFromUri {
@@ -94,19 +96,23 @@ if (!(Test-Path -Path $path)) {
 `))
 
 func (c *HypervClient) CreateOrUpdateFile(path string, source string) (err error) {
+	// BUAK: Function for templating and execution of the ps1 script
+	//
+	// BUAK: c.runFireAndForgetScript starts ps1 script and does not care about return values
 	err = c.runFireAndForgetScript(createOrUpdateFileTemplate, createOrUpdateFileArgs{
 		Source: source,
 		Path:   path,
-		//FileJson:    string(fileJson),
 	})
 
 	return err
 }
 
+// BUAK: struct for GetFile ps1 script
 type getFileArgs struct {
 	Path string
 }
 
+// BUAK: GetFile ps1 script
 var getFileTemplate = template.Must(template.New("GetFile").Parse(`
 $ErrorActionPreference = 'Stop'
 $path='{{.Path}}'
@@ -114,6 +120,7 @@ $path='{{.Path}}'
 $fileObject = $null
 if (Test-Path $path) {
 	$fileObject = Get-ChildItem -path $path | %{ @{
+		Path=$_.Path
 		Name=$_.Name;
 		Size=$_.Length;
 		DirName=$_.DirectoryName;
@@ -123,6 +130,7 @@ if (Test-Path $path) {
 	}}
 }
 
+# BUAK: This script needs to return JSON
 if ($fileObject){
 	$file = ConvertTo-Json -InputObject $fileObject
 	$file
@@ -132,9 +140,10 @@ if ($fileObject){
 `))
 
 func (c *HypervClient) GetFile(path string) (result file, err error) {
+	// BUAK: see CreateOrUpdateFile above
 	err = c.runScriptWithResult(getFileTemplate, getFileArgs{
 		Path: path,
-	}, &result)
+	}, &result)  // BUAK: runScriptWithResult reads JSON output from the script
 
 	return result, err
 }

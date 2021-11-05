@@ -140,6 +140,7 @@ func Provider() *schema.Provider {
 			"hyperv_network_switch":   resourceHyperVNetworkSwitch(),
 			"hyperv_machine_instance": resourceHyperVMachineInstance(),
 			"hyperv_vhd":              resourceHyperVVhd(),
+			// BUAK: Register our resources here!
 			"hyperv_file":             resourceHyperVFile(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{

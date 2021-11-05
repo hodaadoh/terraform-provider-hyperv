@@ -38,4 +38,5 @@ require (
 	google.golang.org/grpc v1.36.0 // indirect
 )
 
+// BUAK: Replace reference of upstream provider to our custom code
 replace github.com/taliesins/terraform-provider-hyperv => github.com/hodaadoh/terraform-provider-hyperv v1.0.3
